@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import Error from "./Error"
 
-const Formulario = ({ pacientes, setPacientes }) => {
+const Formulario = ({ pacientes, setPacientes, paciente, setPaciente }) => {
     const [nombre, setNombre] = useState('')
     const [propietario, setPropietario] = useState('')
     const [email, setEmail] = useState('')
@@ -10,6 +10,18 @@ const Formulario = ({ pacientes, setPacientes }) => {
 
     // Mostrar el error
     const [error, setError] = useState(false)
+
+    // Se ejecuta cada vez que paciente cambie
+    useEffect(() => {
+        // Comprobando si un arreglo está vacio o no
+        if (Object.keys(paciente).length > 0) {
+            setNombre(paciente.nombre)
+            setPropietario(paciente.propietario)
+            setEmail(paciente.email)
+            setFecha(paciente.fecha)
+            setSintomas(paciente.sintomas)
+        }
+    }, [paciente])
 
     // Generar ID
     const generarId = () => {
@@ -35,13 +47,24 @@ const Formulario = ({ pacientes, setPacientes }) => {
             propietario,
             email,
             fecha,
-            sintomas,
-            id: generarId()
+            sintomas
         }
-        // console.log(objetoPaciente)
 
-        // Tomar una copia de lo que ya existe en el arreglo de pacientes de App.jsx y le agregamos el objetoPaciente y se asigna a setPacientes
-        setPacientes([...pacientes, objetoPaciente])
+        if (paciente.id) {
+            // Editando el registro
+            // El id que tengo en el registro previo se lo asigno al nuevo objetoPaciente
+            objetoPaciente.id = paciente.id
+
+            const pacientesActualizados = pacientes.map(pacienteState => pacienteState.id === paciente.id ? objetoPaciente : pacienteState)
+
+            setPacientes(pacientesActualizados)
+            setPaciente({})
+        } else {
+            // Nuevo registro con nuevo id generado que se agrega a setPacientes
+            objetoPaciente.id = generarId()
+            // Tomar una copia de lo que ya existe en el arreglo de pacientes de App.jsx y le agregamos el objetoPaciente y se asigna a setPacientes
+            setPacientes([...pacientes, objetoPaciente])
+        }
 
         // Reiniciar el formulario
         setNombre('')
@@ -100,7 +123,7 @@ const Formulario = ({ pacientes, setPacientes }) => {
                     />
                 </div>
 
-                <input className="bg-indigo-600 w-full p-3 text-white uppercase font-bold cursor-pointer hover:bg-indigo-700 transition-colors" type="submit" value="Agregar Paciente" />
+                <input className="bg-indigo-600 w-full p-3 text-white uppercase font-bold cursor-pointer hover:bg-indigo-700 transition-colors" type="submit" value={paciente.id ? 'Editar Paciente' : 'Agregar Paciente'} />
             </form>
         </div>
     )
